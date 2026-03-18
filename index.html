@@ -111,9 +111,9 @@ p{font-size:.95rem;line-height:1.8}
 .light-section .label{color:var(--orange)}
 
 /* ── PROBLEM/SOLUTION ── */
-.ps-grid{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:60px}
+.ps-grid{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:60px;align-items:stretch}
 @media(max-width:768px){.ps-grid{grid-template-columns:1fr}}
-.ps-card{padding:48px;border-radius:20px;position:relative;overflow:hidden}
+.ps-card{padding:48px;border-radius:20px;position:relative;overflow:hidden;display:flex;flex-direction:column}
 .ps-card.problem{background:linear-gradient(135deg,rgba(232,101,53,.06),rgba(232,101,53,.02));border:1px solid rgba(232,101,53,.1)}
 .ps-card.solution{background:linear-gradient(135deg,rgba(73,158,197,.06),rgba(73,158,197,.02));border:1px solid rgba(73,158,197,.1)}
 .ps-tag{font-family:var(--font);font-size:.65rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:6px 14px;border-radius:100px;display:inline-block;margin-bottom:20px}
@@ -906,36 +906,280 @@ const lineMat = new THREE.LineBasicMaterial({vertexColors: true, transparent: tr
 const lines = new THREE.LineSegments(lineGeom, lineMat);
 scene.add(lines);
 
-// Geometric car wireframe (stylized)
+// ─── DENSE PARAMETRIC SPORTS CAR WIREFRAME ───
 const carGroup = new THREE.Group();
+const matBody = new THREE.LineBasicMaterial({color:0x499EC5, transparent:true, opacity:0.45});
+const matEdge = new THREE.LineBasicMaterial({color:0x499EC5, transparent:true, opacity:0.65});
+const matGlow = new THREE.LineBasicMaterial({color:0x499EC5, transparent:true, opacity:0.25});
+const matOrange = new THREE.LineBasicMaterial({color:0xE86535, transparent:true, opacity:0.7});
+const matOrangeDim = new THREE.LineBasicMaterial({color:0xE86535, transparent:true, opacity:0.35});
 
-// Body
-const bodyGeom = new THREE.BoxGeometry(2.4, 0.6, 1.1);
-const edgesBody = new THREE.EdgesGeometry(bodyGeom);
-const bodyLine = new THREE.LineSegments(edgesBody, new THREE.LineBasicMaterial({color: 0x499EC5, transparent: true, opacity: 0.5}));
-bodyLine.position.y = 0.3;
-carGroup.add(bodyLine);
+// Cross-section stations along the car (x positions from rear to front)
+// Each station: {x, profiles: [{y, z}...]} defining one side (mirrored for other)
+// The car is ~3.4 units long, centered roughly at 0
+// Profile points go from bottom-center up one side
 
-// Cabin
-const cabinGeom = new THREE.BoxGeometry(1.4, 0.5, 0.95);
-const edgesCabin = new THREE.EdgesGeometry(cabinGeom);
-const cabinLine = new THREE.LineSegments(edgesCabin, new THREE.LineBasicMaterial({color: 0x499EC5, transparent: true, opacity: 0.4}));
-cabinLine.position.set(-0.1, 0.8, 0);
-carGroup.add(cabinLine);
+function lerp(a,b,t){return a+(b-a)*t}
 
-// Wheels (4 circles)
-const wheelGeom = new THREE.RingGeometry(0.22, 0.28, 16);
-const wheelEdges = new THREE.EdgesGeometry(wheelGeom);
-[[-0.7, 0, 0.56], [0.7, 0, 0.56], [-0.7, 0, -0.56], [0.7, 0, -0.56]].forEach(pos => {
-  const wheel = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.RingGeometry(0.2, 0.26, 16)),
-    new THREE.LineBasicMaterial({color: 0xE86535, transparent: true, opacity: 0.6}));
-  wheel.position.set(...pos);
-  wheel.rotation.y = Math.PI/2;
-  carGroup.add(wheel);
+// Define stations with height profile + width at key vertical points
+// Format: x, floorW, bodyW, shoulderW, shoulderH, roofW, roofH, wheelCutout
+const stations = [
+  // REAR
+  {x:-1.70, fw:0.20, bw:0.42, sw:0.48, sh:0.28, rw:0.00, rh:0.28, wc:false},
+  {x:-1.60, fw:0.28, bw:0.52, sw:0.56, sh:0.32, rw:0.10, rh:0.35, wc:false},
+  {x:-1.45, fw:0.32, bw:0.56, sw:0.60, sh:0.38, rw:0.30, rh:0.52, wc:false},
+  {x:-1.30, fw:0.34, bw:0.58, sw:0.62, sh:0.40, rw:0.36, rh:0.58, wc:true}, // rear wheel
+  {x:-1.10, fw:0.34, bw:0.58, sw:0.63, sh:0.42, rw:0.38, rh:0.64, wc:true},
+  {x:-0.90, fw:0.34, bw:0.57, sw:0.62, sh:0.44, rw:0.40, rh:0.70, wc:true}, // rear wheel center
+  {x:-0.70, fw:0.34, bw:0.56, sw:0.61, sh:0.44, rw:0.41, rh:0.74, wc:true},
+  {x:-0.50, fw:0.34, bw:0.55, sw:0.60, sh:0.44, rw:0.42, rh:0.76, wc:false},
+  // MID BODY
+  {x:-0.30, fw:0.34, bw:0.54, sw:0.58, sh:0.43, rw:0.42, rh:0.78, wc:false},
+  {x:-0.10, fw:0.33, bw:0.53, sw:0.56, sh:0.42, rw:0.40, rh:0.77, wc:false},
+  {x: 0.10, fw:0.32, bw:0.52, sw:0.55, sh:0.41, rw:0.38, rh:0.74, wc:false},
+  // WINDSHIELD TRANSITION
+  {x: 0.30, fw:0.32, bw:0.51, sw:0.54, sh:0.40, rw:0.34, rh:0.68, wc:false},
+  {x: 0.45, fw:0.31, bw:0.50, sw:0.52, sh:0.38, rw:0.28, rh:0.58, wc:false},
+  {x: 0.60, fw:0.30, bw:0.48, sw:0.50, sh:0.35, rw:0.18, rh:0.46, wc:false},
+  // HOOD
+  {x: 0.75, fw:0.28, bw:0.46, sw:0.48, sh:0.30, rw:0.00, rh:0.32, wc:false},
+  {x: 0.90, fw:0.27, bw:0.44, sw:0.46, sh:0.28, rw:0.00, rh:0.30, wc:true}, // front wheel
+  {x: 1.05, fw:0.26, bw:0.42, sw:0.44, sh:0.26, rw:0.00, rh:0.28, wc:true},
+  {x: 1.20, fw:0.24, bw:0.40, sw:0.42, sh:0.24, rw:0.00, rh:0.26, wc:true}, // front wheel center
+  {x: 1.35, fw:0.22, bw:0.38, sw:0.40, sh:0.22, rw:0.00, rh:0.24, wc:true},
+  {x: 1.50, fw:0.18, bw:0.34, sw:0.36, sh:0.20, rw:0.00, rh:0.22, wc:false},
+  // NOSE
+  {x: 1.65, fw:0.14, bw:0.28, sw:0.30, sh:0.16, rw:0.00, rh:0.18, wc:false},
+  {x: 1.75, fw:0.10, bw:0.20, sw:0.22, sh:0.12, rw:0.00, rh:0.14, wc:false},
+  {x: 1.82, fw:0.06, bw:0.12, sw:0.14, sh:0.08, rw:0.00, rh:0.10, wc:false},
+];
+
+// Generate cross-section points for each station
+// Returns array of Vector3 for one full cross-section (both sides)
+function genSection(s, nPts){
+  const pts = [];
+  const hasRoof = s.rw > 0.01;
+  // Bottom center
+  pts.push(new THREE.Vector3(s.x, -0.02, 0));
+  // Right side going up
+  pts.push(new THREE.Vector3(s.x, -0.02, s.fw));           // floor edge
+  pts.push(new THREE.Vector3(s.x, 0.04, s.bw));            // lower body
+  pts.push(new THREE.Vector3(s.x, s.sh*0.5, s.bw+0.02));   // mid body
+  pts.push(new THREE.Vector3(s.x, s.sh, s.sw));             // shoulder
+  if(hasRoof){
+    pts.push(new THREE.Vector3(s.x, s.rh*0.85, s.rw+0.06)); // roof transition
+    pts.push(new THREE.Vector3(s.x, s.rh, s.rw));            // roof edge
+    pts.push(new THREE.Vector3(s.x, s.rh+0.02, 0));          // roof center
+  } else {
+    pts.push(new THREE.Vector3(s.x, s.rh, 0));               // top center (hood/nose)
+  }
+  // Left side going down (mirror)
+  const rightPts = pts.slice(1, hasRoof ? -1 : pts.length);
+  for(let i = rightPts.length-1; i >= 0; i--){
+    const p = rightPts[i];
+    pts.push(new THREE.Vector3(p.x, p.y, -p.z));
+  }
+  // Close
+  pts.push(new THREE.Vector3(s.x, -0.02, 0));
+  return pts;
+}
+
+// Draw all cross-sections (lateral lines)
+const allSections = [];
+stations.forEach((s, i) => {
+  const pts = genSection(s);
+  allSections.push(pts);
+  const curve = new THREE.CatmullRomCurve3(pts, false);
+  const geom = new THREE.BufferGeometry().setFromPoints(curve.getPoints(60));
+  // Every 3rd section brighter, rest dimmer
+  carGroup.add(new THREE.Line(geom, i%3===0 ? matEdge : matBody));
 });
 
-carGroup.position.set(2.5, -0.3, -1);
+// Draw longitudinal lines (connecting same-index points across stations)
+// Sample each section at fixed parameter values
+const longiCount = 20; // number of longitudinal lines
+for(let li = 0; li < longiCount; li++){
+  const t = li / (longiCount - 1); // 0 to 1 around cross-section
+  const longiPts = [];
+  allSections.forEach(sectionPts => {
+    const idx = Math.floor(t * (sectionPts.length - 1));
+    const frac = t * (sectionPts.length - 1) - idx;
+    if(idx < sectionPts.length - 1){
+      const a = sectionPts[idx], b = sectionPts[idx+1];
+      longiPts.push(new THREE.Vector3(
+        lerp(a.x,b.x,frac), lerp(a.y,b.y,frac), lerp(a.z,b.z,frac)
+      ));
+    } else {
+      longiPts.push(sectionPts[sectionPts.length-1].clone());
+    }
+  });
+  if(longiPts.length > 2){
+    const curve = new THREE.CatmullRomCurve3(longiPts, false);
+    const geom = new THREE.BufferGeometry().setFromPoints(curve.getPoints(80));
+    carGroup.add(new THREE.Line(geom, matGlow));
+  }
+}
+
+// ─── FEATURE LINES (sharper detail) ───
+
+// Shoulder line (the hard crease running along the side)
+const shoulderR = stations.map(s => new THREE.Vector3(s.x, s.sh, s.sw));
+const shoulderL = shoulderR.map(p => new THREE.Vector3(p.x, p.y, -p.z));
+[shoulderR, shoulderL].forEach(pts => {
+  const c = new THREE.CatmullRomCurve3(pts, false);
+  carGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(c.getPoints(80)), matEdge));
+});
+
+// Roofline (where roof meets window)
+const roofStations = stations.filter(s => s.rw > 0.01);
+if(roofStations.length > 2){
+  const roofR = roofStations.map(s => new THREE.Vector3(s.x, s.rh*0.85, s.rw+0.06));
+  const roofL = roofR.map(p => new THREE.Vector3(p.x, p.y, -p.z));
+  const roofTop = roofStations.map(s => new THREE.Vector3(s.x, s.rh+0.02, 0));
+  [roofR, roofL, roofTop].forEach(pts => {
+    const c = new THREE.CatmullRomCurve3(pts, false);
+    carGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(c.getPoints(60)), matEdge));
+  });
+}
+
+// Floor line
+const floorR = stations.map(s => new THREE.Vector3(s.x, -0.02, s.fw));
+const floorL = floorR.map(p => new THREE.Vector3(p.x, p.y, -p.z));
+[floorR, floorL].forEach(pts => {
+  const c = new THREE.CatmullRomCurve3(pts, false);
+  carGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(c.getPoints(60)), matBody));
+});
+
+// Body crease (mid-body horizontal line)
+const creaseR = stations.map(s => new THREE.Vector3(s.x, s.sh*0.5, s.bw+0.02));
+const creaseL = creaseR.map(p => new THREE.Vector3(p.x, p.y, -p.z));
+[creaseR, creaseL].forEach(pts => {
+  const c = new THREE.CatmullRomCurve3(pts, false);
+  carGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(c.getPoints(60)), matGlow));
+});
+
+// ─── WHEEL ARCHES (curved cutouts) ───
+function addWheelArch(centerX, z, radius){
+  const pts = [];
+  for(let a = -Math.PI*0.15; a <= Math.PI*1.15; a += 0.08){
+    pts.push(new THREE.Vector3(
+      centerX + Math.cos(a) * radius * 1.3,
+      -0.02 + Math.sin(a) * radius,
+      z
+    ));
+  }
+  const geom = new THREE.BufferGeometry().setFromPoints(pts);
+  carGroup.add(new THREE.Line(geom, matEdge));
+}
+addWheelArch(-0.90, 0.58, 0.26);
+addWheelArch(-0.90, -0.58, 0.26);
+addWheelArch(1.20, 0.44, 0.22);
+addWheelArch(1.20, -0.44, 0.22);
+
+// ─── WHEELS (detailed) ───
+function addWheel(cx, cy, cz, radius){
+  const wg = new THREE.Group();
+  // Tyre
+  const tyreGeom = new THREE.TorusGeometry(radius, radius*0.18, 8, 32);
+  const tyreEdges = new THREE.EdgesGeometry(tyreGeom);
+  wg.add(new THREE.LineSegments(tyreEdges, matBody));
+  // Rim outer
+  const rimGeom = new THREE.RingGeometry(radius*0.55, radius*0.82, 24);
+  const rimEdges = new THREE.EdgesGeometry(rimGeom);
+  const rim = new THREE.LineSegments(rimEdges, matOrange);
+  rim.rotation.y = Math.PI/2;
+  wg.add(rim);
+  // Hub
+  const hubGeom = new THREE.RingGeometry(radius*0.08, radius*0.2, 12);
+  const hubEdges = new THREE.EdgesGeometry(hubGeom);
+  const hub = new THREE.LineSegments(hubEdges, matOrangeDim);
+  hub.rotation.y = Math.PI/2;
+  wg.add(hub);
+  // 6 spokes
+  for(let s = 0; s < 6; s++){
+    const a = (s/6)*Math.PI*2;
+    const pts = [
+      new THREE.Vector3(0, Math.sin(a)*radius*0.18, Math.cos(a)*radius*0.18),
+      new THREE.Vector3(0, Math.sin(a)*radius*0.78, Math.cos(a)*radius*0.78),
+    ];
+    wg.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), matOrangeDim));
+  }
+  wg.position.set(cx, cy, cz);
+  wg.rotation.y = Math.PI/2;
+  carGroup.add(wg);
+}
+addWheel(-0.90, 0.08, 0.57, 0.22);
+addWheel(-0.90, 0.08, -0.57, 0.22);
+addWheel(1.20, 0.06, 0.43, 0.19);
+addWheel(1.20, 0.06, -0.43, 0.19);
+
+// ─── LIGHTS ───
+// Rear light bar (orange glow)
+const rearPts = [];
+for(let t = -1; t <= 1; t += 0.03){
+  rearPts.push(new THREE.Vector3(-1.68, 0.22 + Math.cos(t*Math.PI*0.5)*0.06, t*0.44));
+}
+carGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(rearPts), matOrange));
+// Second rear light bar lower
+const rearPts2 = [];
+for(let t = -1; t <= 1; t += 0.03){
+  rearPts2.push(new THREE.Vector3(-1.66, 0.10 + Math.cos(t*Math.PI*0.5)*0.02, t*0.40));
+}
+carGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(rearPts2), matOrangeDim));
+
+// Front headlight strips
+const hlR = [], hlL = [];
+for(let t = 0; t <= 1; t += 0.04){
+  const x = 1.75 + t*0.06;
+  const z = 0.06 + t*0.18;
+  const y = 0.12 - t*0.03;
+  hlR.push(new THREE.Vector3(x, y, z));
+  hlL.push(new THREE.Vector3(x, y, -z));
+}
+carGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(hlR), matOrange));
+carGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(hlL), matOrange));
+
+// DRL accent under headlights
+const drlR = [], drlL = [];
+for(let t = 0; t <= 1; t += 0.04){
+  drlR.push(new THREE.Vector3(1.72+t*0.05, 0.06-t*0.02, 0.08+t*0.16));
+  drlL.push(new THREE.Vector3(1.72+t*0.05, 0.06-t*0.02, -(0.08+t*0.16)));
+}
+carGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(drlR), matOrangeDim));
+carGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(drlL), matOrangeDim));
+
+// ─── WINDSHIELD FRAME ───
+const wsTopR = new THREE.Vector3(0.10, 0.74, 0.38);
+const wsTopL = new THREE.Vector3(0.10, 0.74, -0.38);
+const wsBotR = new THREE.Vector3(0.70, 0.38, 0.48);
+const wsBotL = new THREE.Vector3(0.70, 0.38, -0.48);
+const wsFrame = [wsBotR, wsTopR, new THREE.Vector3(0.10, 0.78, 0), wsTopL, wsBotL];
+const wsCurve = new THREE.CatmullRomCurve3(wsFrame, false);
+carGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(wsCurve.getPoints(40)), matEdge));
+
+// A-pillar lines
+[{a:wsBotR, b:wsTopR}, {a:wsBotL, b:wsTopL}].forEach(({a,b}) => {
+  carGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([a,b]), matEdge));
+});
+
+// ─── DOOR LINE ───
+const doorX = 0.05;
+const doorPts = [
+  new THREE.Vector3(doorX, 0.04, 0.54),
+  new THREE.Vector3(doorX, 0.30, 0.56),
+  new THREE.Vector3(doorX, 0.60, 0.42),
+  new THREE.Vector3(doorX, 0.76, 0.30),
+];
+const doorL = doorPts.map(p => new THREE.Vector3(p.x, p.y, -p.z));
+[doorPts, doorL].forEach(pts => {
+  const c = new THREE.CatmullRomCurve3(pts, false);
+  carGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(c.getPoints(30)), matGlow));
+});
+
+// ─── POSITION & SCALE ───
+carGroup.position.set(2.0, -0.15, -0.8);
 carGroup.rotation.y = -0.4;
+carGroup.scale.set(1.25, 1.25, 1.25);
 scene.add(carGroup);
 
 // Orbiting data nodes around car
