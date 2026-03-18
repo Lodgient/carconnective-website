@@ -1,0 +1,10 @@
+{
+  "name": "carconnective-website",
+  "version": "1.0.0",
+  "description": "CarConnective — Connected Vehicle Intelligence Platform",
+  "private": true,
+  "scripts": {
+    "dev": "npx serve .",
+    "build": "echo 'Static site — no build step required'"
+  }
+}

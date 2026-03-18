@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>CarConnective — Connected Vehicle Intelligence Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+--blue:#499EC5;--blue-d:#3580A3;--blue-l:rgba(73,158,197,.08);--blue-glow:rgba(73,158,197,.15);
+--dark:#0A0F0E;--dark2:#121B1A;--dark3:#1A2625;--dark4:#243432;
+--orange:#E86535;--orange-l:#FEF0EB;--orange-glow:rgba(232,101,53,.12);
+--white:#FAFCFD;--g50:#F4F7F9;--g100:#E8EDF1;--g200:#D5DCE2;--g300:#B0BBC5;--g400:#7D8B97;--g500:#556370;--g600:#3A4750;
+--font:'Outfit',system-ui,sans-serif;--font2:'Inter',system-ui,sans-serif;
+--ease:cubic-bezier(.16,1,.3,1);--ease-out:cubic-bezier(.33,1,.68,1);
+--max:1240px;
+}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+body{font-family:var(--font2);color:var(--g500);background:var(--dark);overflow-x:hidden;line-height:1.7}
+
+/* ── GLOBAL ── */
+.container{max-width:var(--max);margin:0 auto;padding:0 40px}
+@media(max-width:768px){.container{padding:0 24px}}
+.section{padding:140px 0;position:relative}
+@media(max-width:768px){.section{padding:80px 0}}
+.tc{text-align:center}
+
+/* ── TYPE ── */
+h1,h2,h3,h4,h5{font-family:var(--font);letter-spacing:-.035em;line-height:1.08;color:var(--white)}
+h1{font-size:clamp(2.8rem,6vw,5rem);font-weight:700}
+h2{font-size:clamp(2.2rem,4.5vw,3.6rem);font-weight:700;margin-bottom:24px}
+h3{font-size:clamp(1.1rem,2vw,1.3rem);font-weight:600;margin-bottom:10px;color:var(--white)}
+p{font-size:.95rem;line-height:1.8}
+.lead{font-size:clamp(1.05rem,1.5vw,1.2rem);line-height:1.85;color:var(--g300);max-width:660px}
+.lead.c{margin-left:auto;margin-right:auto}
+.label{font-family:var(--font);font-size:.7rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--orange);margin-bottom:16px;display:inline-block}
+.accent{color:var(--blue)}
+.accent-o{color:var(--orange)}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:10px;padding:16px 32px;border-radius:12px;font-family:var(--font);font-weight:600;font-size:.9rem;text-decoration:none;border:none;cursor:pointer;transition:all .4s var(--ease);letter-spacing:-.01em;position:relative;overflow:hidden}
+.btn-p{background:var(--orange);color:#fff;box-shadow:0 4px 24px rgba(232,101,53,.25),inset 0 1px 0 rgba(255,255,255,.15)}
+.btn-p:hover{transform:translateY(-2px);box-shadow:0 8px 40px rgba(232,101,53,.35),inset 0 1px 0 rgba(255,255,255,.2)}
+.btn-s{background:rgba(73,158,197,.08);color:var(--blue);border:1px solid rgba(73,158,197,.2);backdrop-filter:blur(12px)}
+.btn-s:hover{background:rgba(73,158,197,.15);border-color:rgba(73,158,197,.35);transform:translateY(-2px)}
+.btn-w{background:rgba(255,255,255,.04);color:var(--white);border:1px solid rgba(255,255,255,.1);backdrop-filter:blur(12px)}
+.btn-w:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2);transform:translateY(-2px)}
+.btn-group{display:flex;gap:16px;flex-wrap:wrap}
+
+/* ── NAV ── */
+#nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:20px 0;transition:all .5s var(--ease)}
+#nav.scrolled{padding:12px 0;background:rgba(10,15,14,.85);backdrop-filter:blur(20px) saturate(1.8);border-bottom:1px solid rgba(255,255,255,.04)}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;max-width:var(--max);margin:0 auto;padding:0 40px}
+.nav-logo{display:flex;align-items:center;gap:10px;font-family:var(--font);font-weight:700;font-size:1.25rem;color:var(--white);text-decoration:none;letter-spacing:-.02em}
+.nav-logo .logo-mark{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--blue),var(--blue-d));display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:800;color:#fff;letter-spacing:0}
+.nav-links{display:flex;align-items:center;gap:8px}
+.nav-links a{font-family:var(--font);font-size:.85rem;font-weight:500;color:var(--g300);text-decoration:none;padding:8px 16px;border-radius:8px;transition:all .3s var(--ease)}
+.nav-links a:hover{color:var(--white);background:rgba(255,255,255,.05)}
+.nav-links .nav-cta{background:var(--orange);color:#fff;font-weight:600;padding:10px 22px}
+.nav-links .nav-cta:hover{background:#d45a2e;transform:translateY(-1px)}
+.nav-toggle{display:none;background:none;border:none;width:32px;height:32px;cursor:pointer;position:relative}
+.nav-toggle span{display:block;width:22px;height:2px;background:var(--white);position:absolute;left:5px;transition:.3s}
+.nav-toggle span:nth-child(1){top:10px}.nav-toggle span:nth-child(2){top:16px}.nav-toggle span:nth-child(3){top:22px}
+@media(max-width:900px){
+.nav-links{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(10,15,14,.97);backdrop-filter:blur(30px);flex-direction:column;justify-content:center;gap:4px;padding:40px}
+.nav-links.open{display:flex}
+.nav-links a{font-size:1.3rem;padding:16px 24px}
+.nav-toggle{display:block}
+.nav-inner{padding:0 24px}
+}
+
+/* ── HERO ── */
+#hero{min-height:100vh;display:flex;align-items:center;position:relative;overflow:hidden}
+#hero-canvas{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1}
+.hero-overlay{position:absolute;top:0;left:0;right:0;bottom:0;z-index:2;background:radial-gradient(ellipse 60% 50% at 50% 40%,transparent 0%,rgba(10,15,14,.4) 50%,rgba(10,15,14,.85) 100%)}
+.hero-content{position:relative;z-index:3;padding-top:120px;max-width:720px}
+.hero-content h1{margin-bottom:28px}
+.hero-content h1 .line{display:block;overflow:hidden}
+.hero-content h1 .line span{display:inline-block}
+.hero-content .lead{margin-bottom:40px}
+.hero-stats{display:flex;gap:48px;margin-top:56px;padding-top:40px;border-top:1px solid rgba(255,255,255,.06)}
+.hero-stats .stat{text-align:left}
+.hero-stats .stat-val{font-family:var(--font);font-size:1.8rem;font-weight:700;color:var(--white);letter-spacing:-.03em}
+.hero-stats .stat-val span{color:var(--blue)}
+.hero-stats .stat-label{font-size:.78rem;color:var(--g400);margin-top:4px;letter-spacing:.02em}
+@media(max-width:768px){.hero-stats{gap:24px;flex-wrap:wrap}.hero-stats .stat-val{font-size:1.4rem}}
+.scroll-indicator{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);z-index:3;display:flex;flex-direction:column;align-items:center;gap:10px;opacity:.5}
+.scroll-indicator span{font-size:.7rem;font-family:var(--font);letter-spacing:.15em;text-transform:uppercase;color:var(--g400)}
+.scroll-line{width:1px;height:48px;background:linear-gradient(to bottom,var(--blue),transparent);animation:scrollPulse 2s ease infinite}
+@keyframes scrollPulse{0%,100%{opacity:.3;transform:scaleY(.6)}50%{opacity:1;transform:scaleY(1)}}
+
+/* ── TRUST BAR ── */
+.trust-bar{padding:60px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.trust-text{font-family:var(--font);font-size:.85rem;font-weight:500;color:var(--g400);text-align:center;line-height:1.6}
+.trust-text strong{color:var(--g300)}
+
+/* ── DARK SECTIONS ── */
+.dark-section{background:var(--dark)}
+.dark-section h2,.dark-section h3{color:var(--white)}
+.dark-section p{color:var(--g400)}
+
+/* ── LIGHT SECTIONS ── */
+.light-section{background:var(--white);color:var(--dark2)}
+.light-section h2,.light-section h3{color:var(--dark2)}
+.light-section p{color:var(--g500)}
+.light-section .label{color:var(--orange)}
+
+/* ── PROBLEM/SOLUTION ── */
+.ps-grid{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:60px}
+@media(max-width:768px){.ps-grid{grid-template-columns:1fr}}
+.ps-card{padding:48px;border-radius:20px;position:relative;overflow:hidden}
+.ps-card.problem{background:linear-gradient(135deg,rgba(232,101,53,.06),rgba(232,101,53,.02));border:1px solid rgba(232,101,53,.1)}
+.ps-card.solution{background:linear-gradient(135deg,rgba(73,158,197,.06),rgba(73,158,197,.02));border:1px solid rgba(73,158,197,.1)}
+.ps-tag{font-family:var(--font);font-size:.65rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:6px 14px;border-radius:100px;display:inline-block;margin-bottom:20px}
+.ps-tag.red{background:rgba(232,101,53,.1);color:var(--orange)}
+.ps-tag.green{background:rgba(73,158,197,.1);color:var(--blue)}
+
+/* ── STEPS ── */
+.steps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin-top:60px}
+@media(max-width:768px){.steps-grid{grid-template-columns:1fr}}
+.step-card{padding:40px 32px;border-radius:20px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);transition:all .5s var(--ease);position:relative;overflow:hidden}
+.step-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--blue),var(--orange));opacity:0;transition:opacity .5s}
+.step-card:hover{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.08);transform:translateY(-4px)}
+.step-card:hover::before{opacity:1}
+.step-num{font-family:var(--font);font-size:3.5rem;font-weight:800;color:rgba(73,158,197,.1);line-height:1;margin-bottom:20px;transition:color .5s}
+.step-card:hover .step-num{color:rgba(73,158,197,.2)}
+
+/* ── MODULES ── */
+.modules-section{background:linear-gradient(180deg,var(--dark) 0%,#0D1413 100%)}
+.mod-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:60px}
+@media(max-width:900px){.mod-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.mod-grid{grid-template-columns:1fr}}
+.mod-card{padding:36px 32px;border-radius:20px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04);transition:all .5s var(--ease);position:relative;overflow:hidden}
+.mod-card::after{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(135deg,rgba(73,158,197,.04),transparent);opacity:0;transition:opacity .5s}
+.mod-card:hover{border-color:rgba(73,158,197,.15);transform:translateY(-4px);background:rgba(255,255,255,.03)}
+.mod-card:hover::after{opacity:1}
+.mod-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;font-size:1.3rem;position:relative;z-index:1}
+.mod-icon.b{background:rgba(73,158,197,.1);color:var(--blue)}
+.mod-icon.o{background:rgba(232,101,53,.1);color:var(--orange)}
+.mod-card p{position:relative;z-index:1}
+
+/* ── DIFFERENTIATORS ── */
+.diff-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:60px}
+@media(max-width:900px){.diff-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.diff-grid{grid-template-columns:1fr}}
+.diff-card{text-align:center;padding:40px 28px;border-radius:20px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04);transition:all .5s var(--ease)}
+.diff-card:hover{border-color:rgba(73,158,197,.12);transform:translateY(-4px)}
+.diff-icon{width:56px;height:56px;border-radius:16px;background:rgba(73,158,197,.08);color:var(--blue);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:1.4rem;transition:all .5s var(--ease)}
+.diff-card:hover .diff-icon{background:rgba(73,158,197,.15);transform:scale(1.05)}
+
+/* ── ONBOARDING ── */
+.onb-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:60px}
+@media(max-width:768px){.onb-grid{grid-template-columns:1fr}}
+.onb-card{padding:48px 40px;border-radius:24px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);transition:all .5s var(--ease)}
+.onb-card:hover{border-color:rgba(255,255,255,.1);transform:translateY(-3px)}
+.onb-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:100px;font-family:var(--font);font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:24px}
+.onb-badge.a{background:rgba(73,158,197,.1);color:var(--blue)}
+.onb-badge.b{background:rgba(232,101,53,.1);color:var(--orange)}
+
+/* ── SECURITY ── */
+.sec-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:60px}
+@media(max-width:768px){.sec-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:500px){.sec-grid{grid-template-columns:1fr}}
+.sec-badge{padding:32px 24px;border-radius:16px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04);text-align:center;transition:all .5s var(--ease)}
+.sec-badge:hover{border-color:rgba(73,158,197,.12);transform:translateY(-3px)}
+.sec-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:1.2rem}
+.sec-icon.green{background:rgba(52,199,89,.1);color:#34c759}
+.sec-icon.blue{background:rgba(73,158,197,.1);color:var(--blue)}
+.sec-icon.indigo{background:rgba(88,86,214,.1);color:#5856d6}
+.sec-icon.amber{background:rgba(255,159,10,.1);color:#ff9f0a}
+.sec-icon.purple{background:rgba(175,82,222,.1);color:#af52de}
+.sec-icon.red{background:rgba(255,69,58,.1);color:#ff453a}
+.sec-name{font-family:var(--font);font-weight:700;font-size:.88rem;color:var(--white);margin-bottom:6px}
+.sec-desc{font-size:.78rem;color:var(--g400);line-height:1.6}
+
+/* ── FLEET SECTION ── */
+.fleet-section{background:linear-gradient(180deg,var(--dark) 0%,#0C1211 100%);position:relative}
+.fleet-section::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(73,158,197,.2),transparent)}
+.fleet-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:60px}
+@media(max-width:768px){.fleet-grid{grid-template-columns:1fr}}
+.fleet-card{padding:36px 32px;border-radius:20px;background:rgba(73,158,197,.03);border:1px solid rgba(73,158,197,.08);transition:all .5s var(--ease)}
+.fleet-card:hover{border-color:rgba(73,158,197,.18);transform:translateY(-4px);background:rgba(73,158,197,.05)}
+
+/* ── CTA SECTION ── */
+.cta-section{padding:160px 0;position:relative;overflow:hidden;text-align:center}
+.cta-section::before{content:'';position:absolute;top:50%;left:50%;width:800px;height:800px;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(73,158,197,.08) 0%,transparent 70%);pointer-events:none}
+.cta-section h2{max-width:700px;margin:0 auto 20px}
+.cta-section .lead{max-width:600px;margin:0 auto 40px}
+
+/* ── FAQ ── */
+.faq-list{max-width:760px;margin:60px auto 0}
+.faq-item{border-bottom:1px solid rgba(255,255,255,.05);overflow:hidden}
+.faq-q{display:flex;align-items:center;justify-content:space-between;width:100%;padding:24px 0;background:none;border:none;cursor:pointer;font-family:var(--font);font-size:1.05rem;font-weight:600;color:var(--white);text-align:left;transition:color .3s;gap:20px}
+.faq-q:hover{color:var(--blue)}
+.faq-q .faq-arrow{width:24px;height:24px;border-radius:8px;background:rgba(255,255,255,.04);display:flex;align-items:center;justify-content:center;font-size:.7rem;color:var(--g400);transition:all .3s;flex-shrink:0}
+.faq-item.open .faq-arrow{transform:rotate(180deg);background:rgba(73,158,197,.1);color:var(--blue)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .5s var(--ease),padding .5s var(--ease)}
+.faq-a-inner{padding:0 0 24px;color:var(--g400);font-size:.92rem;line-height:1.8}
+.faq-item.open .faq-a{max-height:400px}
+
+/* ── FOOTER ── */
+footer{padding:80px 0 40px;border-top:1px solid rgba(255,255,255,.04)}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;margin-bottom:60px}
+@media(max-width:768px){.footer-grid{grid-template-columns:1fr 1fr;gap:32px}}
+.footer-brand p{color:var(--g500);font-size:.85rem;margin-top:16px;max-width:300px}
+.footer-col h5{font-family:var(--font);font-size:.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--g300);margin-bottom:16px}
+.footer-col a{display:block;font-size:.88rem;color:var(--g500);text-decoration:none;padding:4px 0;transition:color .3s}
+.footer-col a:hover{color:var(--blue)}
+.footer-bottom{display:flex;justify-content:space-between;align-items:center;padding-top:32px;border-top:1px solid rgba(255,255,255,.04);font-size:.78rem;color:var(--g500)}
+@media(max-width:600px){.footer-bottom{flex-direction:column;gap:8px}}
+
+/* ── ANIMATIONS ── */
+.reveal{opacity:0;transform:translateY(40px);transition:opacity .8s var(--ease),transform .8s var(--ease)}
+.reveal.vis{opacity:1;transform:translateY(0)}
+.reveal.d1{transition-delay:.1s}.reveal.d2{transition-delay:.2s}.reveal.d3{transition-delay:.3s}
+.reveal.d4{transition-delay:.4s}.reveal.d5{transition-delay:.5s}
+
+/* ── GLOW ORBS ── */
+.glow-orb{position:absolute;border-radius:50%;filter:blur(120px);pointer-events:none;opacity:.5}
+.glow-blue{background:rgba(73,158,197,.12)}
+.glow-orange{background:rgba(232,101,53,.08)}
+
+/* ── GRADIENT DIVIDER ── */
+.grad-div{height:1px;background:linear-gradient(90deg,transparent,rgba(73,158,197,.15),rgba(232,101,53,.1),transparent);margin:0}
+
+/* ── PAGES ── */
+.page{display:none}.page.active{display:block}
+
+/* ── MOBILE NAV OPEN ── */
+.nav-toggle.open span:nth-child(1){transform:rotate(45deg);top:16px}
+.nav-toggle.open span:nth-child(2){opacity:0}
+.nav-toggle.open span:nth-child(3){transform:rotate(-45deg);top:16px}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+<div class="nav-inner">
+<a href="#" class="nav-logo" onclick="go('home');return false">
+<div class="logo-mark">CC</div>
+CarConnective
+</a>
+<div class="nav-links" id="navLinks">
+<a href="#" onclick="go('home');return false">Home</a>
+<a href="#" onclick="go('platform');return false">Platform</a>
+<a href="#" onclick="go('how');return false">How It Works</a>
+<a href="#" onclick="go('fleet');return false">FleetConnective</a>
+<a href="#" onclick="go('faq');return false">FAQ</a>
+<a href="#" class="nav-cta" onclick="go('demo');return false">Book a Demo</a>
+</div>
+<button class="nav-toggle" id="navToggle" onclick="toggleNav()">
+<span></span><span></span><span></span>
+</button>
+</div>
+</nav>
+
+<!-- ==================== HOME ==================== -->
+<div class="page active" id="page-home">
+
+<!-- HERO -->
+<section id="hero">
+<canvas id="hero-canvas"></canvas>
+<div class="hero-overlay"></div>
+<div class="container hero-content">
+<p class="label reveal">Connected Vehicle Intelligence</p>
+<h1 class="reveal d1">
+<span class="line"><span>Every vehicle you sell</span></span>
+<span class="line"><span>becomes a customer</span></span>
+<span class="line"><span>you <span class="accent">keep.</span></span></span>
+</h1>
+<p class="lead reveal d2">CarConnective turns every sold vehicle into a live digital relationship. Real-time vehicle data powers service alerts, trade-in intelligence, and automated campaigns — no hardware, no dongles, no guesswork. Just a smarter dealership.</p>
+<div class="btn-group reveal d3">
+<a href="#" class="btn btn-p" onclick="go('demo');return false">Book a Demo <span>→</span></a>
+<a href="#" class="btn btn-s" onclick="go('how');return false">See How It Works</a>
+</div>
+<div class="hero-stats reveal d4">
+<div class="stat"><div class="stat-val">40<span>+</span></div><div class="stat-label">Vehicle brands</div></div>
+<div class="stat"><div class="stat-val">175M<span>+</span></div><div class="stat-label">Compatible vehicles</div></div>
+<div class="stat"><div class="stat-val">0</div><div class="stat-label">Hardware required</div></div>
+<div class="stat"><div class="stat-val">30<span>+</span></div><div class="stat-label">Countries</div></div>
+</div>
+</div>
+<div class="scroll-indicator">
+<span>Scroll</span>
+<div class="scroll-line"></div>
+</div>
+</section>
+
+<!-- TRUST BAR -->
+<div class="trust-bar">
+<div class="container">
+<p class="trust-text reveal">Powered by the same connected vehicle technology trusted by <strong>Uber, Lyft, Turo, and the world's leading mobility companies.</strong></p>
+</div>
+</div>
+
+<!-- PROBLEM / SOLUTION -->
+<section class="section dark-section">
+<div class="container">
+<div class="tc">
+<p class="label reveal">The problem</p>
+<h2 class="reveal d1">The moment a vehicle leaves your lot,<br>you lose <span class="accent-o">visibility.</span></h2>
+</div>
+<div class="ps-grid">
+<div class="ps-card problem reveal">
+<span class="ps-tag red">Without CarConnective</span>
+<h3>You're selling blind.</h3>
+<p>Mileage climbing. Diagnostic codes firing. Oil life depleting. Battery levels dropping. Lease milestones approaching. That data exists — your dealership just can't see it.</p>
+</div>
+<div class="ps-card solution reveal d1">
+<span class="ps-tag green">With CarConnective</span>
+<h3>A live connection to every vehicle you've ever sold.</h3>
+<p>CarConnective connects directly to the vehicle's onboard computer systems through secure automotive APIs. No hardware installs. No dongles. No GPS trackers. No OBD devices. The customer authorises access in under two minutes, and your dealership gets a live data feed from their vehicle — indefinitely.</p>
+<p style="margin-top:16px">That data powers everything: automated service reminders triggered by actual vehicle conditions, trade-in intelligence based on real mileage and equity, AI-optimised campaigns that reach customers at exactly the right moment, and a branded ownership experience that keeps your dealership top of mind long after the sale.</p>
+</div>
+</div>
+</div>
+<!-- glow orbs -->
+<div class="glow-orb glow-orange" style="width:500px;height:500px;top:-100px;right:-200px"></div>
+<div class="glow-orb glow-blue" style="width:400px;height:400px;bottom:-100px;left:-150px"></div>
+</section>
+
+<div class="grad-div"></div>
+
+<!-- HOW IT WORKS (MINI) -->
+<section class="section dark-section">
+<div class="container">
+<div class="tc">
+<p class="label reveal">How it works</p>
+<h2 class="reveal d1">Three steps. <span class="accent">Two minutes.</span></h2>
+</div>
+<div class="steps-grid">
+<div class="step-card reveal">
+<div class="step-num">01</div>
+<h3>Customer connects in under two minutes</h3>
+<p>After the sale, your team sends a branded invite via SMS or your dealership app. The customer taps the link, logs in with their vehicle manufacturer account, and authorises data sharing. No downloads required — no friction.</p>
+</div>
+<div class="step-card reveal d1">
+<div class="step-num">02</div>
+<h3>Live vehicle data flows to your dashboard</h3>
+<p>Odometer readings. Fuel and battery levels. Diagnostic alerts. Service status. Location where supported. Everything updates automatically through secure webhooks — no polling, no manual checks.</p>
+</div>
+<div class="step-card reveal d2">
+<div class="step-num">03</div>
+<h3>Your dealership takes intelligent action</h3>
+<p>CarConnective analyses every data point and surfaces the right action at the right time. A maintenance alert becomes a booked appointment. A mileage milestone becomes a trade-in offer. A lease expiry becomes an upgrade conversation. Every signal becomes revenue.</p>
+</div>
+</div>
+<div class="tc reveal" style="margin-top:50px">
+<a href="#" class="btn btn-s" onclick="go('how');return false">See the full walkthrough →</a>
+</div>
+</div>
+</section>
+
+<div class="grad-div"></div>
+
+<!-- PLATFORM MODULES -->
+<section class="section modules-section">
+<div class="container">
+<div class="tc">
+<p class="label reveal">The platform</p>
+<h2 class="reveal d1">One platform. <span class="accent">Every module you need.</span></h2>
+<p class="lead c reveal d2">CarConnective is a modular intelligence platform. Activate what you need. Scale when you're ready.</p>
+</div>
+<div class="mod-grid">
+<div class="mod-card reveal">
+<div class="mod-icon b">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+</div>
+<h3>Dashboard</h3>
+<p>Your command centre. Real-time overview of every connected vehicle, active alerts, campaign performance, and revenue opportunities — all in one view.</p>
+</div>
+<div class="mod-card reveal d1">
+<div class="mod-icon b">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+</div>
+<h3>Connected Vehicles</h3>
+<p>Every vehicle you've sold, live on your screen. Odometer, fuel, battery, diagnostics, location — updated automatically through secure API connections.</p>
+</div>
+<div class="mod-card reveal d2">
+<div class="mod-icon o">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/><circle cx="12" cy="10" r="3"/></svg>
+</div>
+<h3>Service &amp; Alerts</h3>
+<p>Automated service reminders triggered by actual vehicle conditions — not arbitrary timelines. Oil life low? Brake wear detected? Tyre pressure dropping? Your customer hears from you first.</p>
+</div>
+<div class="mod-card reveal d3">
+<div class="mod-icon b">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+</div>
+<h3>Trade-In Manager</h3>
+<p>Know when a customer's vehicle is approaching peak trade-in value. Real mileage data, market conditions, and AI scoring identify the right customers at the right time.</p>
+</div>
+<div class="mod-card reveal d4">
+<div class="mod-icon o">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+</div>
+<h3>Campaigns</h3>
+<p>Send targeted campaigns triggered by vehicle events. A diagnostic alert becomes a service offer. A mileage milestone becomes a trade-in prompt. AI optimises timing for maximum conversion.</p>
+</div>
+<div class="mod-card reveal d5">
+<div class="mod-icon b">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 16v-4M12 8h.01"/></svg>
+</div>
+<h3>Smart F&amp;I</h3>
+<p>Digital protection plan builder. Extended warranty, prepaid maintenance, upgrade prompts, and renewal offers — delivered at the moment vehicle data says the customer is ready.</p>
+</div>
+<div class="mod-card reveal">
+<div class="mod-icon o">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a4 4 0 0 0-8 0v2"/></svg>
+</div>
+<h3>LeaseIQ</h3>
+<p>Lease lifecycle management. Track return dates, monitor mileage against lease terms, schedule inspections, and deliver buyout or upgrade offers before the customer shops elsewhere.</p>
+</div>
+<div class="mod-card reveal d1">
+<div class="mod-icon b">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+</div>
+<h3>MyConnected Fleet</h3>
+<p>Real-time fleet operations for your dealership's own vehicles — loaners, demos, shuttles. Track location, trips, assignments, and utilisation without hardware.</p>
+</div>
+<div class="mod-card reveal d2">
+<div class="mod-icon o">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+</div>
+<h3>Notifications Centre</h3>
+<p>Centralised alert management for your team. Every vehicle event, every customer action, every opportunity — prioritised by urgency and revenue potential.</p>
+</div>
+</div>
+</div>
+<div class="glow-orb glow-blue" style="width:600px;height:600px;top:50%;left:-300px;transform:translateY(-50%)"></div>
+</section>
+
+<div class="grad-div"></div>
+
+<!-- DIFFERENTIATORS -->
+<section class="section dark-section">
+<div class="container">
+<div class="tc">
+<p class="label reveal">Why CarConnective</p>
+<h2 class="reveal d1">Built different. <span class="accent">By design.</span></h2>
+</div>
+<div class="diff-grid">
+<div class="diff-card reveal">
+<div class="diff-icon">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+</div>
+<h3>Zero hardware</h3>
+<p>No OBD devices. No GPS trackers. No dongles. Pure software, pure API. Vehicles connect digitally in under two minutes.</p>
+</div>
+<div class="diff-card reveal d1">
+<div class="diff-icon">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+</div>
+<h3>40+ brands</h3>
+<p>Ford, Toyota, BMW, Mercedes, Tesla, GM, Volkswagen, Hyundai, and dozens more. One integration covers 175+ million vehicles.</p>
+</div>
+<div class="diff-card reveal d2">
+<div class="diff-icon">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+</div>
+<h3>Consent-first</h3>
+<p>Every connection is customer-authorised through OAuth2. No data harvesting. No backdoors. Full compliance with GDPR and privacy regulations.</p>
+</div>
+<div class="diff-card reveal d3">
+<div class="diff-icon">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+</div>
+<h3>Modular by design</h3>
+<p>Activate only the modules you need. Start with service alerts. Add trade-in intelligence. Scale to full platform when ready. No bloat.</p>
+</div>
+</div>
+</div>
+</section>
+
+<div class="grad-div"></div>
+
+<!-- ONBOARDING -->
+<section class="section dark-section">
+<div class="container">
+<div class="tc">
+<p class="label reveal">Customer onboarding</p>
+<h2 class="reveal d1">Two paths. <span class="accent">One seamless experience.</span></h2>
+<p class="lead c reveal d2">Choose the onboarding flow that fits your dealership. Both get the customer connected in under two minutes.</p>
+</div>
+<div class="onb-grid">
+<div class="onb-card reveal">
+<div class="onb-badge a">✦ Option A</div>
+<h3>Branded Mobile App</h3>
+<p>Your dealership's own branded app. Customer downloads, logs in with their vehicle manufacturer account, and authorises data sharing. Full ownership experience — alerts, service booking, trade-in status, F&I wallet, lease tracking, and multi-vehicle support.</p>
+</div>
+<div class="onb-card reveal d1">
+<div class="onb-badge b">✦ Option B</div>
+<h3>SMS + Mobile Web</h3>
+<p>No app required. Dealer sends an SMS invite link after the sale. Customer taps, authenticates with their vehicle manufacturer in a mobile web flow, and they're connected. Fastest path to activation — zero download friction.</p>
+</div>
+</div>
+</div>
+</section>
+
+<div class="grad-div"></div>
+
+<!-- SECURITY -->
+<section class="section dark-section">
+<div class="container">
+<div class="tc">
+<p class="label reveal">Security &amp; compliance</p>
+<h2 class="reveal d1">Enterprise-grade security.<br><span class="accent">Non-negotiable.</span></h2>
+<p class="lead c reveal d2">CarConnective is built on the same security infrastructure trusted by the world's largest mobility platforms. Every connection is encrypted, consented, and auditable.</p>
+</div>
+<div class="sec-grid">
+<div class="sec-badge reveal">
+<div class="sec-icon green">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+</div>
+<div class="sec-name">SOC 2 Type II</div>
+<div class="sec-desc">Continuous security monitoring and controls validated by independent audit.</div>
+</div>
+<div class="sec-badge reveal d1">
+<div class="sec-icon blue">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+</div>
+<div class="sec-name">ISO 27001</div>
+<div class="sec-desc">International standard for information security management systems.</div>
+</div>
+<div class="sec-badge reveal d2">
+<div class="sec-icon indigo">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+</div>
+<div class="sec-name">ISO 27701</div>
+<div class="sec-desc">Privacy information management extending ISO 27001 for personal data protection.</div>
+</div>
+<div class="sec-badge reveal d3">
+<div class="sec-icon amber">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+</div>
+<div class="sec-name">GDPR Compliant</div>
+<div class="sec-desc">Full compliance with EU data protection regulations. Privacy by design throughout.</div>
+</div>
+<div class="sec-badge reveal d4">
+<div class="sec-icon purple">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+</div>
+<div class="sec-name">AES-256 Encryption</div>
+<div class="sec-desc">Military-grade encryption for all data in transit and at rest. Zero plaintext storage.</div>
+</div>
+<div class="sec-badge reveal d5">
+<div class="sec-icon red">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+</div>
+<div class="sec-name">Annual Pen Testing</div>
+<div class="sec-desc">Third-party penetration testing ensures ongoing security against emerging threats.</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section dark-section">
+<div class="container">
+<p class="label reveal">Get started</p>
+<h2 class="reveal d1">Ready to turn every vehicle<br>into a <span class="accent">revenue engine?</span></h2>
+<p class="lead c reveal d2">Book a demo and see how CarConnective turns every sold vehicle into a live customer relationship — powered by real data, not guesswork.</p>
+<div class="btn-group reveal d3" style="justify-content:center">
+<a href="#" class="btn btn-p" onclick="go('demo');return false">Book a Demo <span>→</span></a>
+<a href="#" class="btn btn-w">Talk to Sales</a>
+</div>
+</div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+<div class="container">
+<div class="footer-grid">
+<div class="footer-brand">
+<a href="#" class="nav-logo" onclick="go('home');return false" style="margin-bottom:0">
+<div class="logo-mark">CC</div>
+CarConnective
+</a>
+<p>Connected vehicle intelligence for automotive dealerships and fleet operators. Turning vehicles into live digital assets.</p>
+</div>
+<div class="footer-col">
+<h5>Platform</h5>
+<a href="#" onclick="go('platform');return false">All Modules</a>
+<a href="#" onclick="go('how');return false">How It Works</a>
+<a href="#" onclick="go('fleet');return false">FleetConnective</a>
+<a href="#">Pricing</a>
+</div>
+<div class="footer-col">
+<h5>Company</h5>
+<a href="#">About</a>
+<a href="#">Careers</a>
+<a href="#">Contact</a>
+<a href="#">Blog</a>
+</div>
+<div class="footer-col">
+<h5>Legal</h5>
+<a href="#">Privacy Policy</a>
+<a href="#">Terms of Service</a>
+<a href="#">Security</a>
+<a href="#">GDPR</a>
+</div>
+</div>
+<div class="footer-bottom">
+<span>© 2026 CarConnective. All rights reserved.</span>
+<span>Connected Vehicle Intelligence</span>
+</div>
+</div>
+</footer>
+</div><!-- end page-home -->
+
+<!-- ==================== PLATFORM ==================== -->
+<div class="page" id="page-platform">
+<section class="section dark-section" style="padding-top:160px">
+<div class="container">
+<p class="label reveal">Platform modules</p>
+<h2 class="reveal d1">Everything you need to turn<br>vehicles into <span class="accent">intelligent assets.</span></h2>
+<p class="lead reveal d2">CarConnective is a modular platform. Every module works independently. Together, they create the most complete connected vehicle intelligence system built for dealerships.</p>
+<div class="mod-grid" style="margin-top:60px">
+<div class="mod-card reveal"><div class="mod-icon b"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div><h3>Dashboard</h3><p>Your command centre. Real-time overview of every connected vehicle, active alerts, campaign performance, and revenue opportunities — all in one view.</p></div>
+<div class="mod-card reveal d1"><div class="mod-icon b"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div><h3>Connected Vehicles</h3><p>Every vehicle you've sold, live on your screen. Odometer, fuel, battery, diagnostics, location — updated automatically through secure API connections.</p></div>
+<div class="mod-card reveal d2"><div class="mod-icon o"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div><h3>Service &amp; Alerts</h3><p>Automated service reminders triggered by actual vehicle conditions — not arbitrary timelines. Oil life low? Brake wear detected? Tyre pressure dropping? Your customer hears from you first.</p></div>
+<div class="mod-card reveal d3"><div class="mod-icon b"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div><h3>Trade-In Manager</h3><p>Know when a customer's vehicle is approaching peak trade-in value. Real mileage data, market conditions, and AI scoring identify the right customers at the right time.</p></div>
+<div class="mod-card reveal d4"><div class="mod-icon o"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><h3>Campaigns</h3><p>Send targeted campaigns triggered by vehicle events. A diagnostic alert becomes a service offer. A mileage milestone becomes a trade-in prompt. AI optimises timing for maximum conversion.</p></div>
+<div class="mod-card reveal d5"><div class="mod-icon b"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div><h3>Notifications Centre</h3><p>Centralised alert management for your team. Every vehicle event, every customer action, every opportunity — prioritised by urgency and revenue potential.</p></div>
+<div class="mod-card reveal"><div class="mod-icon o"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg></div><h3>Customer Support</h3><p>Connected support tools that give your team instant visibility into a customer's vehicle status. Resolve issues faster when you can see exactly what the vehicle is reporting.</p></div>
+<div class="mod-card reveal d1"><div class="mod-icon b"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div><h3>Settings</h3><p>Full dealership configuration — user roles, permissions, notification preferences, branding, integrations, and API management. White-label everything.</p></div>
+<div class="mod-card reveal d2"><div class="mod-icon b"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 16v-4M12 8h.01"/></svg></div><h3>Smart F&amp;I</h3><p>Digital protection plan builder. Extended warranty, prepaid maintenance, upgrade prompts, and renewal offers — delivered at the moment vehicle data says the customer is ready.</p></div>
+<div class="mod-card reveal d3"><div class="mod-icon o"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a4 4 0 0 0-8 0v2"/></svg></div><h3>LeaseIQ</h3><p>Lease lifecycle management. Track return dates, monitor mileage against lease terms, schedule inspections, and deliver buyout or upgrade offers before the customer shops elsewhere.</p></div>
+<div class="mod-card reveal d4"><div class="mod-icon b"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><h3>MyConnected Fleet</h3><p>Real-time fleet operations for your dealership's own vehicles — loaners, demos, shuttles. Track location, trips, assignments, and utilisation without hardware.</p></div>
+</div>
+</div>
+</section>
+</div><!-- end page-platform -->
+
+<!-- ==================== HOW IT WORKS ==================== -->
+<div class="page" id="page-how">
+<section class="section dark-section" style="padding-top:160px">
+<div class="container">
+<p class="label reveal">How it works</p>
+<h2 class="reveal d1">From setup to automation<br>in <span class="accent">five steps.</span></h2>
+<p class="lead reveal d2">CarConnective is designed for speed. Your dealership can be live and connected within days — not months.</p>
+<div style="max-width:760px;margin:60px auto 0">
+<div class="step-card reveal" style="margin-bottom:24px">
+<div class="step-num">01</div>
+<h3>Dealership setup</h3>
+<p>We configure your CarConnective instance — branding, modules, team access, notification preferences, and DMS integrations. Your platform is ready before your first vehicle connects.</p>
+</div>
+<div class="step-card reveal" style="margin-bottom:24px">
+<div class="step-num">02</div>
+<h3>Customer invitation</h3>
+<p>After every sale, your team sends a branded connection invite — via your dealership app or a simple SMS link. The customer taps once, authenticates with their vehicle manufacturer, and authorises data sharing. Under two minutes. Zero friction.</p>
+</div>
+<div class="step-card reveal" style="margin-bottom:24px">
+<div class="step-num">03</div>
+<h3>Vehicle connection</h3>
+<p>The vehicle's onboard computer systems connect to CarConnective through secure automotive APIs. Odometer, fuel, battery, diagnostics, service status, and location (where supported) begin flowing automatically. No hardware. No installs. No maintenance.</p>
+</div>
+<div class="step-card reveal" style="margin-bottom:24px">
+<div class="step-num">04</div>
+<h3>Intelligence activation</h3>
+<p>CarConnective's AI engine begins analysing every data point. At-risk vehicle scoring, trade-in likelihood, campaign timing optimisation, and alert prioritisation activate immediately. Your dashboard becomes a live intelligence feed.</p>
+</div>
+<div class="step-card reveal">
+<div class="step-num">05</div>
+<h3>Automation takes over</h3>
+<p>Service alerts trigger appointment bookings. Mileage milestones trigger trade-in offers. Lease expiry dates trigger upgrade conversations. Diagnostic codes trigger customer outreach. Every signal becomes an automated, revenue-generating action.</p>
+</div>
+</div>
+</div>
+</section>
+
+<div class="grad-div"></div>
+
+<section class="section dark-section">
+<div class="container">
+<div class="tc">
+<p class="label reveal">Technical foundations</p>
+<h2 class="reveal d1">The infrastructure behind<br>the <span class="accent">intelligence.</span></h2>
+</div>
+<div class="diff-grid" style="margin-top:60px">
+<div class="diff-card reveal"><div class="diff-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div><h3>API-first architecture</h3><p>Every feature is powered by secure APIs. RESTful endpoints, webhook delivery, and real-time event streaming.</p></div>
+<div class="diff-card reveal d1"><div class="diff-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div><h3>Real-time webhooks</h3><p>Vehicle events are pushed the instant they occur. No polling intervals. No stale data. True real-time intelligence.</p></div>
+<div class="diff-card reveal d2"><div class="diff-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div><h3>End-to-end encryption</h3><p>AES-256 encryption in transit and at rest. OAuth2 authentication. SOC 2, ISO 27001, and GDPR compliant.</p></div>
+<div class="diff-card reveal d3"><div class="diff-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div><h3>40+ brands, one API</h3><p>Ford, Toyota, BMW, Mercedes, Tesla, GM, Volkswagen, Hyundai, and dozens more — all through a single integration.</p></div>
+</div>
+</div>
+</section>
+</div><!-- end page-how -->
+
+<!-- ==================== FLEETCONNECTIVE ==================== -->
+<div class="page" id="page-fleet">
+<section class="section fleet-section" style="padding-top:160px">
+<div class="container">
+<p class="label reveal">FleetConnective</p>
+<h2 class="reveal d1">Your fleet is talking.<br><span class="accent">Start listening.</span></h2>
+<p class="lead reveal d2">FleetConnective gives fleet operators real-time operational intelligence across every vehicle — without installing a single piece of hardware. Same technology. Built for fleet operations.</p>
+
+<div class="fleet-grid">
+<div class="fleet-card reveal">
+<h3>Vehicle health monitoring</h3>
+<p>Real-time diagnostics across your entire fleet. Engine status, battery health, tyre pressure, fluid levels — all visible from a single dashboard. Know the condition of every vehicle without waiting for a driver to report it.</p>
+</div>
+<div class="fleet-card reveal d1">
+<h3>Mileage &amp; fuel tracking</h3>
+<p>Accurate odometer readings and fuel levels updated automatically. Track consumption patterns, identify inefficient vehicles, and optimise routes based on real data — not estimates.</p>
+</div>
+<div class="fleet-card reveal d2">
+<h3>Predictive maintenance</h3>
+<p>AI analyses vehicle data to predict failures before they happen. Schedule maintenance proactively, reduce breakdowns, extend vehicle lifespans, and cut unplanned downtime.</p>
+</div>
+<div class="fleet-card reveal d3">
+<h3>Trip logs &amp; assignments</h3>
+<p>Automatic trip recording with start/end locations, distance, duration, and driver assignment. Full visibility into how your fleet is being used — without GPS hardware or manual logs.</p>
+</div>
+<div class="fleet-card reveal d4">
+<h3>Fleet utilisation insights</h3>
+<p>Identify underutilised vehicles, optimise fleet size, and make data-driven decisions about which vehicles to keep, rotate, or retire. Real data replaces guesswork.</p>
+</div>
+<div class="fleet-card reveal d5">
+<h3>Maintenance alerts</h3>
+<p>Automated alerts triggered by actual vehicle conditions. Service due, diagnostics flagged, mileage thresholds reached — your operations team knows instantly and can act immediately.</p>
+</div>
+</div>
+
+<div class="tc reveal" style="margin-top:60px">
+<p class="lead c" style="margin-bottom:32px">Built for fleet operators, logistics companies, and any organisation managing vehicles at scale.</p>
+<a href="#" class="btn btn-p" onclick="go('demo');return false">Book a Fleet Demo <span>→</span></a>
+</div>
+</div>
+<div class="glow-orb glow-blue" style="width:500px;height:500px;top:200px;right:-250px"></div>
+</section>
+</div><!-- end page-fleet -->
+
+<!-- ==================== FAQ ==================== -->
+<div class="page" id="page-faq">
+<section class="section dark-section" style="padding-top:160px">
+<div class="container">
+<div class="tc">
+<p class="label reveal">FAQ</p>
+<h2 class="reveal d1">Frequently asked <span class="accent">questions.</span></h2>
+</div>
+<div class="faq-list">
+<div class="faq-item reveal">
+<button class="faq-q">How does CarConnective connect to vehicles without hardware?<span class="faq-arrow">▼</span></button>
+<div class="faq-a"><div class="faq-a-inner">CarConnective connects directly to a vehicle's onboard computer systems through secure automotive APIs. When a customer authorises the connection (using their vehicle manufacturer login), we establish a persistent digital link to the vehicle. This allows us to read data like odometer, fuel level, battery status, diagnostics, and more — all without installing any physical device. The technology works with 40+ vehicle brands and 175+ million compatible vehicles globally.</div></div>
+</div>
+<div class="faq-item reveal">
+<button class="faq-q">Which vehicle brands are supported?<span class="faq-arrow">▼</span></button>
+<div class="faq-a"><div class="faq-a-inner">CarConnective supports 40+ vehicle brands including Ford, Toyota, BMW, Mercedes-Benz, Tesla, General Motors (Chevrolet, GMC, Cadillac, Buick), Volkswagen, Hyundai, Kia, Nissan, Honda, Subaru, Volvo, Land Rover, Jaguar, Audi, Porsche, MINI, and many more. Coverage continues to expand as more manufacturers open their connected vehicle APIs. Contact us for the most current compatibility list for your market.</div></div>
+</div>
+<div class="faq-item reveal">
+<button class="faq-q">What data can CarConnective access from a vehicle?<span class="faq-arrow">▼</span></button>
+<div class="faq-a"><div class="faq-a-inner">Available data varies by vehicle brand and model year, but commonly includes: odometer readings, fuel level, battery level and range (EVs), engine oil life, tyre pressure, diagnostic trouble codes, vehicle location (where supported), VIN and vehicle attributes, and service status indicators. All data access requires explicit customer consent through a secure OAuth2 flow.</div></div>
+</div>
+<div class="faq-item reveal">
+<button class="faq-q">How does customer consent work?<span class="faq-arrow">▼</span></button>
+<div class="faq-a"><div class="faq-a-inner">Every connection requires explicit customer authorisation. The customer receives a branded invite from your dealership (via app or SMS), logs in with their vehicle manufacturer credentials, and grants specific data permissions. This uses the same OAuth2 protocol trusted by banking and enterprise software. Customers can revoke access at any time. No data is ever collected without informed, active consent.</div></div>
+</div>
+<div class="faq-item reveal">
+<button class="faq-q">How long does it take to set up CarConnective?<span class="faq-arrow">▼</span></button>
+<div class="faq-a"><div class="faq-a-inner">Your dealership can be live within days. Platform configuration — branding, modules, user access, and integrations — is handled during onboarding. Once live, each customer vehicle connection takes under two minutes. There's no hardware to install, no infrastructure to build, and no lengthy integration projects.</div></div>
+</div>
+<div class="faq-item reveal">
+<button class="faq-q">Is CarConnective secure?<span class="faq-arrow">▼</span></button>
+<div class="faq-a"><div class="faq-a-inner">Security is foundational, not an afterthought. CarConnective is built on infrastructure that meets SOC 2 Type II, ISO 27001, and ISO 27701 standards. All data is encrypted with AES-256 both in transit and at rest. We undergo annual third-party penetration testing. Customer authentication uses OAuth2 — the same standard used by major banks and enterprise platforms. We are fully GDPR compliant.</div></div>
+</div>
+<div class="faq-item reveal">
+<button class="faq-q">What's the difference between CarConnective and FleetConnective?<span class="faq-arrow">▼</span></button>
+<div class="faq-a"><div class="faq-a-inner">Same core technology, different focus. CarConnective is built for automotive dealerships — post-sale engagement, service retention, trade-in intelligence, and customer lifecycle management. FleetConnective is built for fleet operators — vehicle health monitoring, predictive maintenance, trip logs, utilisation analytics, and operational efficiency. Both use the same secure API infrastructure and require zero hardware.</div></div>
+</div>
+<div class="faq-item reveal">
+<button class="faq-q">Does CarConnective replace my DMS?<span class="faq-arrow">▼</span></button>
+<div class="faq-a"><div class="faq-a-inner">No. CarConnective complements your existing DMS by adding a layer of real-time vehicle intelligence that your DMS doesn't have. We integrate with your existing systems — feeding vehicle data into your workflows, not replacing them. Think of CarConnective as the intelligence layer that makes your existing tools smarter.</div></div>
+</div>
+<div class="faq-item reveal">
+<button class="faq-q">Can customers see their own vehicle data?<span class="faq-arrow">▼</span></button>
+<div class="faq-a"><div class="faq-a-inner">Yes. Through your dealer-branded experience (app or mobile web), customers can view their vehicle's status, receive service alerts, track maintenance history, manage protection plans, and interact with your dealership — all from their phone. This branded ownership experience keeps your dealership top of mind and gives customers a reason to stay connected.</div></div>
+</div>
+<div class="faq-item reveal">
+<button class="faq-q">What does CarConnective cost?<span class="faq-arrow">▼</span></button>
+<div class="faq-a"><div class="faq-a-inner">CarConnective offers flexible pricing based on your dealership's size and the modules you activate. There are no hardware costs, no installation fees, and no per-vehicle device charges. Contact our sales team for a customised quote based on your dealership's needs and scale.</div></div>
+</div>
+</div>
+</div>
+</section>
+</div><!-- end page-faq -->
+
+<!-- ==================== DEMO ==================== -->
+<div class="page" id="page-demo">
+<section class="cta-section dark-section" style="padding-top:200px">
+<div class="container">
+<p class="label reveal">Book a demo</p>
+<h2 class="reveal d1">See CarConnective<br><span class="accent">in action.</span></h2>
+<p class="lead c reveal d2">Book a personalised demo and see exactly how CarConnective can transform your dealership's post-sale experience, service retention, and trade-in acquisition — all powered by real-time vehicle data.</p>
+<div class="reveal d3" style="max-width:500px;margin:40px auto 0;padding:48px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:24px">
+<p style="color:var(--g300);text-align:center;font-size:.95rem;margin-bottom:24px">Demo request form will be integrated here.</p>
+<a href="mailto:hello@carconnective.io" class="btn btn-p" style="width:100%;justify-content:center">Contact Us →</a>
+</div>
+</div>
+</section>
+</div><!-- end page-demo -->
+
+<!-- ==================== THREE.JS + GSAP ==================== -->
+<script>
+// ==============================
+// THREE.JS HERO SCENE
+// ==============================
+(function(){
+const canvas = document.getElementById('hero-canvas');
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 1000);
+camera.position.set(0, 1, 6);
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+// Particle system — data constellation
+const particleCount = 1800;
+const positions = new Float32Array(particleCount * 3);
+const colors = new Float32Array(particleCount * 3);
+const sizes = new Float32Array(particleCount);
+const velocities = [];
+
+const blue = new THREE.Color(0x499EC5);
+const orange = new THREE.Color(0xE86535);
+const white = new THREE.Color(0xCCDDEE);
+
+for(let i = 0; i < particleCount; i++){
+  // Distribute in a sphere-ish cloud
+  const theta = Math.random() * Math.PI * 2;
+  const phi = Math.acos(2 * Math.random() - 1);
+  const r = 2 + Math.random() * 5;
+  positions[i*3] = r * Math.sin(phi) * Math.cos(theta);
+  positions[i*3+1] = r * Math.sin(phi) * Math.sin(theta) - 0.5;
+  positions[i*3+2] = r * Math.cos(phi);
+
+  const c = Math.random();
+  const col = c < 0.5 ? blue : c < 0.7 ? orange : white;
+  colors[i*3] = col.r;
+  colors[i*3+1] = col.g;
+  colors[i*3+2] = col.b;
+
+  sizes[i] = 0.5 + Math.random() * 2.5;
+  velocities.push({
+    x: (Math.random()-0.5)*0.003,
+    y: (Math.random()-0.5)*0.003,
+    z: (Math.random()-0.5)*0.003
+  });
+}
+
+const pGeom = new THREE.BufferGeometry();
+pGeom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+pGeom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+pGeom.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+// Custom shader material for glow particles
+const pMat = new THREE.ShaderMaterial({
+  uniforms: { uTime: {value: 0} },
+  vertexShader: `
+    attribute float size;
+    attribute vec3 color;
+    varying vec3 vColor;
+    varying float vAlpha;
+    uniform float uTime;
+    void main(){
+      vColor = color;
+      vec4 mv = modelViewMatrix * vec4(position, 1.0);
+      float dist = length(mv.xyz);
+      vAlpha = smoothstep(8.0, 2.0, dist) * (0.4 + 0.3 * sin(uTime * 0.5 + position.x * 2.0));
+      gl_PointSize = size * (200.0 / -mv.z);
+      gl_Position = projectionMatrix * mv;
+    }
+  `,
+  fragmentShader: `
+    varying vec3 vColor;
+    varying float vAlpha;
+    void main(){
+      float d = length(gl_PointCoord - 0.5);
+      if(d > 0.5) discard;
+      float alpha = smoothstep(0.5, 0.0, d) * vAlpha;
+      gl_FragColor = vec4(vColor, alpha);
+    }
+  `,
+  transparent: true,
+  depthWrite: false,
+  blending: THREE.AdditiveBlending
+});
+
+const particles = new THREE.Points(pGeom, pMat);
+scene.add(particles);
+
+// Connection lines between nearby particles
+const lineCount = 200;
+const linePositions = new Float32Array(lineCount * 6);
+const lineColors = new Float32Array(lineCount * 6);
+const lineGeom = new THREE.BufferGeometry();
+lineGeom.setAttribute('position', new THREE.BufferAttribute(linePositions, 3));
+lineGeom.setAttribute('color', new THREE.BufferAttribute(lineColors, 3));
+const lineMat = new THREE.LineBasicMaterial({vertexColors: true, transparent: true, opacity: 0.08, blending: THREE.AdditiveBlending});
+const lines = new THREE.LineSegments(lineGeom, lineMat);
+scene.add(lines);
+
+// Geometric car wireframe (stylized)
+const carGroup = new THREE.Group();
+
+// Body
+const bodyGeom = new THREE.BoxGeometry(2.4, 0.6, 1.1);
+const edgesBody = new THREE.EdgesGeometry(bodyGeom);
+const bodyLine = new THREE.LineSegments(edgesBody, new THREE.LineBasicMaterial({color: 0x499EC5, transparent: true, opacity: 0.5}));
+bodyLine.position.y = 0.3;
+carGroup.add(bodyLine);
+
+// Cabin
+const cabinGeom = new THREE.BoxGeometry(1.4, 0.5, 0.95);
+const edgesCabin = new THREE.EdgesGeometry(cabinGeom);
+const cabinLine = new THREE.LineSegments(edgesCabin, new THREE.LineBasicMaterial({color: 0x499EC5, transparent: true, opacity: 0.4}));
+cabinLine.position.set(-0.1, 0.8, 0);
+carGroup.add(cabinLine);
+
+// Wheels (4 circles)
+const wheelGeom = new THREE.RingGeometry(0.22, 0.28, 16);
+const wheelEdges = new THREE.EdgesGeometry(wheelGeom);
+[[-0.7, 0, 0.56], [0.7, 0, 0.56], [-0.7, 0, -0.56], [0.7, 0, -0.56]].forEach(pos => {
+  const wheel = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.RingGeometry(0.2, 0.26, 16)),
+    new THREE.LineBasicMaterial({color: 0xE86535, transparent: true, opacity: 0.6}));
+  wheel.position.set(...pos);
+  wheel.rotation.y = Math.PI/2;
+  carGroup.add(wheel);
+});
+
+carGroup.position.set(2.5, -0.3, -1);
+carGroup.rotation.y = -0.4;
+scene.add(carGroup);
+
+// Orbiting data nodes around car
+const nodeGroup = new THREE.Group();
+const nodeGeom = new THREE.SphereGeometry(0.06, 8, 8);
+const nodeData = [];
+for(let i = 0; i < 8; i++){
+  const angle = (i / 8) * Math.PI * 2;
+  const r = 1.8 + Math.random() * 0.5;
+  const node = new THREE.Mesh(nodeGeom, new THREE.MeshBasicMaterial({
+    color: i % 2 === 0 ? 0x499EC5 : 0xE86535,
+    transparent: true, opacity: 0.8
+  }));
+  node.position.set(
+    Math.cos(angle) * r,
+    (Math.random()-0.5) * 1.2,
+    Math.sin(angle) * r
+  );
+  nodeGroup.add(node);
+  nodeData.push({mesh: node, angle, r, speed: 0.2 + Math.random() * 0.3, yOff: node.position.y});
+}
+nodeGroup.position.copy(carGroup.position);
+scene.add(nodeGroup);
+
+// Mouse interaction
+let mouseX = 0, mouseY = 0;
+document.addEventListener('mousemove', (e) => {
+  mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+  mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+});
+
+// Animation loop
+let time = 0;
+function animate(){
+  requestAnimationFrame(animate);
+  time += 0.016;
+  pMat.uniforms.uTime.value = time;
+
+  // Animate particles
+  const pos = pGeom.attributes.position.array;
+  for(let i = 0; i < particleCount; i++){
+    pos[i*3] += velocities[i].x;
+    pos[i*3+1] += velocities[i].y;
+    pos[i*3+2] += velocities[i].z;
+    // Boundary check
+    const dist = Math.sqrt(pos[i*3]**2 + pos[i*3+1]**2 + pos[i*3+2]**2);
+    if(dist > 7){
+      velocities[i].x *= -1; velocities[i].y *= -1; velocities[i].z *= -1;
+    }
+  }
+  pGeom.attributes.position.needsUpdate = true;
+
+  // Update connection lines
+  let lineIdx = 0;
+  for(let i = 0; i < particleCount && lineIdx < lineCount; i += 10){
+    for(let j = i+10; j < particleCount && lineIdx < lineCount; j += 10){
+      const dx = pos[i*3]-pos[j*3], dy = pos[i*3+1]-pos[j*3+1], dz = pos[i*3+2]-pos[j*3+2];
+      const d = Math.sqrt(dx*dx+dy*dy+dz*dz);
+      if(d < 1.5){
+        const li = lineIdx * 6;
+        linePositions[li]=pos[i*3]; linePositions[li+1]=pos[i*3+1]; linePositions[li+2]=pos[i*3+2];
+        linePositions[li+3]=pos[j*3]; linePositions[li+4]=pos[j*3+1]; linePositions[li+5]=pos[j*3+2];
+        const a = 1 - d/1.5;
+        lineColors[li]=0.29*a; lineColors[li+1]=0.62*a; lineColors[li+2]=0.77*a;
+        lineColors[li+3]=0.29*a; lineColors[li+4]=0.62*a; lineColors[li+5]=0.77*a;
+        lineIdx++;
+      }
+    }
+  }
+  lineGeom.attributes.position.needsUpdate = true;
+  lineGeom.attributes.color.needsUpdate = true;
+
+  // Rotate car
+  carGroup.rotation.y += 0.002;
+
+  // Orbit data nodes
+  nodeData.forEach((n, i) => {
+    n.angle += n.speed * 0.016;
+    n.mesh.position.set(
+      Math.cos(n.angle) * n.r,
+      n.yOff + Math.sin(time * 0.8 + i) * 0.15,
+      Math.sin(n.angle) * n.r
+    );
+  });
+  nodeGroup.rotation.y += 0.001;
+
+  // Camera follows mouse subtly
+  camera.position.x += (mouseX * 0.5 - camera.position.x) * 0.02;
+  camera.position.y += (-mouseY * 0.3 + 1 - camera.position.y) * 0.02;
+  camera.lookAt(0.5, 0, 0);
+
+  // Slow scene rotation
+  particles.rotation.y += 0.0003;
+
+  renderer.render(scene, camera);
+}
+animate();
+
+// Resize
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+})();
+
+// ==============================
+// GSAP SCROLL ANIMATIONS
+// ==============================
+gsap.registerPlugin(ScrollTrigger);
+
+// Hero entrance timeline
+const heroTL = gsap.timeline({delay: 0.3});
+heroTL
+  .from('.hero-content .label', {opacity:0, y:30, duration:0.8, ease:'power2.out'})
+  .from('.hero-content h1 .line span', {y:'105%', opacity:0, duration:1, ease:'power3.out', stagger:0.15}, '-=0.4')
+  .from('.hero-content .lead', {opacity:0, y:25, duration:0.8, ease:'power2.out'}, '-=0.5')
+  .from('.hero-content .btn-group', {opacity:0, y:25, duration:0.8, ease:'power2.out'}, '-=0.5')
+  .from('.hero-stats .stat', {opacity:0, y:20, duration:0.6, ease:'power2.out', stagger:0.1}, '-=0.3')
+  .from('.scroll-indicator', {opacity:0, duration:1, ease:'power2.out'}, '-=0.2');
+
+// ==============================
+// INTERSECTION OBSERVER
+// ==============================
+function observeReveals(){
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting) entry.target.classList.add('vis');
+    });
+  }, {threshold: 0.08, rootMargin: '0px 0px -30px 0px'});
+  document.querySelectorAll('.page.active .reveal').forEach(el => obs.observe(el));
+}
+
+// ==============================
+// NAV
+// ==============================
+window.addEventListener('scroll', () => {
+  document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 50);
+});
+
+function toggleNav(){
+  const links = document.getElementById('navLinks');
+  const btn = document.getElementById('navToggle');
+  links.classList.toggle('open');
+  btn.classList.toggle('open');
+}
+
+// ==============================
+// PAGE ROUTING
+// ==============================
+function go(id){
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const page = document.getElementById('page-'+id);
+  if(page) page.classList.add('active');
+  window.scrollTo({top:0, behavior:'instant'});
+  document.getElementById('navLinks').classList.remove('open');
+  document.getElementById('navToggle').classList.remove('open');
+  // Re-trigger reveals
+  setTimeout(() => {
+    document.querySelectorAll('.page.active .reveal').forEach(el => {
+      el.classList.remove('vis');
+      void el.offsetWidth;
+    });
+    observeReveals();
+    ScrollTrigger.refresh();
+  }, 50);
+}
+
+// ==============================
+// FAQ TOGGLES
+// ==============================
+document.querySelectorAll('.faq-q').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const item = btn.parentElement;
+    const wasOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+    if(!wasOpen) item.classList.add('open');
+  });
+});
+
+// ==============================
+// INIT
+// ==============================
+document.addEventListener('DOMContentLoaded', () => {
+  observeReveals();
+  document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 50);
+});
+</script>
+</body>
+</html>
